@@ -42,4 +42,13 @@ class AuthController extends Controller
             'role' => $role,  // Send the role (can be multiple roles)
         ]);
     }
+
+    public function logout(Request $request)
+    {
+        // Revoke the user's current token (log them out)
+        $request->user()->currentAccessToken()->delete();
+
+        // Return a response confirming the logout
+        return response()->json(['message' => 'Successfully logged out']);
+    }
 }

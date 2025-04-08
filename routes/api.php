@@ -24,3 +24,5 @@ Route::middleware(['auth:sanctum', 'role:employee'])->prefix('employee')->group(
 });
 
 Route::post('login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->post('logout', [AuthController::class, 'logout']);
+
