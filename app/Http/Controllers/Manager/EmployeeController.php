@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\Manager\EmployeeResource;
 
 class EmployeeController extends Controller
 {
@@ -17,10 +18,9 @@ class EmployeeController extends Controller
             ->where('department_id', $departmentId)
             ->get();
 
-        return response()->json($employees);
+        return EmployeeResource::collection($employees);
     }
 
-    // Update employee in same department only
     public function update(Request $request, User $employee)
     {
         $managerDepartment = Auth::user()->department_id;
@@ -37,6 +37,6 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
-        return response()->json($employee);
+        return new EmployeeResource($employee);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\Admin\EmployeeResource;
 
 class EmployeeController extends Controller
 {
@@ -14,13 +15,10 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        //
-        return User::role('employee')->get();
+        $employees = User::role('employee')->with('department')->get();
+        return EmployeeResource::collection($employees);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -41,20 +39,9 @@ class EmployeeController extends Controller
 
         $user->assignRole('employee');
 
-        return response()->json($user, 201);
+        return new EmployeeResource($user->load('department'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $employee)
     {
         $validated = $request->validate([
@@ -65,7 +52,14 @@ class EmployeeController extends Controller
         ]);
 
         $employee->update($validated);
-        return response()->json($employee);
+
+        return new EmployeeResource($employee->load('department'));
+    }
+
+    public function show(string $id)
+    {
+        $employee = User::role('employee')->with('department')->findOrFail($id);
+        return new EmployeeResource($employee);
     }
 
     /**
