@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\Admin\EmployeeResource;
+use App\Models\Employee;
 
 class EmployeeController extends Controller
 {
@@ -15,32 +16,33 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $employees = User::role('employee')->with('department')->get();
+        $employees = Employee::all();
         return EmployeeResource::collection($employees);
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'phone' => 'nullable|string',
-            'password' => 'required|min:6',
-            'department_id' => 'nullable|exists:departments,id',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:employees,email',
+        'phone' => 'nullable|string|max:20',
+        'department' => 'required|string|max:255',
+        'joining_date' => 'required|date',
+    ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'password' => Hash::make($validated['password']),
-            'department_id' => $validated['department_id'] ?? null,
-        ]);
+    $employee = Employee::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'phone' => $validated['phone'] ?? null,
+        'department' => $validated['department'],
+        'joining_date' => $validated['joining_date'],
+    ]);
 
-        $user->assignRole('employee');
+    // Agar Spatie package use kar rahe ho
+    // $employee->assignRole('employee');
 
-        return new EmployeeResource($user->load('department'));
-    }
+    return new EmployeeResource($employee);
+}
 
     public function update(Request $request, User $employee)
     {
